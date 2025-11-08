@@ -6,7 +6,7 @@ x = linspace(0,10,N);
 
 dx = x(2)-x(1);
 dt = dx ./ 100;
-epsilon = 0.1;
+epsilon = 0.5;
 
 
 % Initialise the matrix Ahat, Mhat,  and vector fhat.
@@ -26,6 +26,12 @@ for i = 3:N-2
           + 0.06 * sin(4*pi*(i-3)*dx) ...
           + 0.02 * cos(10*pi*(i-3)*dx);
 end
+v_n(1) = 0.03;
+v_n(2) = 0.03; 
+v_n(N-1) = 0.03; 
+v_n(N) = 0.03; 
+
+
 
 % loop over the intervals
 for k = 1:(length(x)-1)
@@ -72,18 +78,21 @@ end
 %vector and solve
 counter = 0;
 figure
-while counter <7
+while counter <10000
     counter = counter + 1;
     plot(x, v_n)
-    pause(0.1)
-    G = [M, dt.* A; sparse(N,N), M];
-    b = [M*v_n; epsilon.^2 .* A * v_n  + f];
+    ylim([-1.5,1.5])
+    pause(0.001)
+    G = [M, dt.* A; -epsilon.^2 .* A, M];
+    b = [M*v_n;  f];
     sol = G \ b; 
-    v_n = sol(1:N); 
-    disp(norm(v_n))
+    v_n = sol(1:N);
+    sprintf("mass: %f", sum(v_n)./N)
     u_n = sol(N+1:end);
-    disp(norm(u_n))
-    
+    sprintf("energy: %f", sum(u_n))
+
+    %reset the f vector
+    f = zeros(N,1);
     for k = 1:(length(x)-1)
          % extract endpoints of the interval
         x1 = x(k);
