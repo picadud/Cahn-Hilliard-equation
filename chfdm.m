@@ -7,28 +7,31 @@ dx = space_length / (N-1);
 X = 0:dx:space_length;
 
 %time_length = 100;
-epsilon = 0.5;
+epsilon = 0.1;
 M = 1;
-dt = dx / 2;
+dt = dx / 10;
 
 % Initial condition
 U = zeros(N,1);
 
 %interior points
-for i = 3:N-2
-    U(i) = 0.1 * sin(2*pi*(i-3)*dx) ...
-          + 0.01 * cos(4*pi*(i-3)*dx) ...
-          + 0.06 * sin(4*pi*(i-3)*dx) ...
-          + 0.02 * cos(10*pi*(i-3)*dx);
-end
-
-% boundary poidisnts
-U(1) = 0.03;
-U(2) = 0.03; 
-U(N-1) = 0.03; 
-U(N) = 0.03; 
+% for i = 3:N-2
+%     U(i) = 0.1 * sin(2*pi*(i-3)*dx) ...
+%           + 0.01 * cos(4*pi*(i-3)*dx) ...
+%           + 0.06 * sin(4*pi*(i-3)*dx) ...
+%           + 0.02 * cos(10*pi*(i-3)*dx);
+% end
+% 
+% % boundary poidisnts
+% U(1) = 0.03;
+% U(2) = 0.03; 
+% U(N-1) = 0.03; 
+% U(N) = 0.03; 
 %disp("U")
 %disp(U)
+for i = 1: N
+    U(i) = 1.6 * i*dx ./  10  - 0.8;
+end
 
 %define 1d laplacian(central difference) matrix
 
@@ -46,7 +49,7 @@ laplacian(1,2) =  2;
 laplacian(N,N-1) = 2;
 %laplacian(1,N) = 1;
 %laplacian(N, 1) = 1;
-display(laplacian)
+%display(laplacian)
 squared_laplacian = laplacian^2;
 %display(squared_laplacian)
 laplacian = laplacian ./ dx^2;
@@ -76,31 +79,16 @@ while 1%i < 1000
     i = i+1;
     t(i) = (i-1) * dt;
     Un = diag(U);
-    %Eyre spliting matrix
+    %assemble Eyre spliting matrix
     A = eye(N) + dt * (epsilon^2 * laplacian^2 - laplacian * Un^2);
 
-    %explicit matrix
-
-    %A_exp = 
-    
-    %reinforce boundary condition
-
-    %disp("A")
-    %disp(A)
-    %assemble rhs
+    %assemble vector
     b =  U - dt .* laplacian * U;
-    %disp("b")
-    %disp(b)
-    %solve
-    
+    %slove the linear system
     U = A\b;
-    %disp("U n+1")
-    %disp(U)
-    
     %explicit solver
-
     U_exp = dt .* (-epsilon.^2 * laplacian^2*U_exp + laplacian * (U_exp.^3 - U_exp)) + U_exp;
-    disp(U_exp)
+    %disp(U_exp)
     %U = clip(U, -0.99, 0.99);
     %plot U
     subplot(2,2,1)
@@ -111,8 +99,8 @@ while 1%i < 1000
     
     %plot U_exp
     subplot(2,2,2)
-    plot(t, norm(U_exp), 'LineWidth', 2);
-    %ylim([-1,1])
+    plot(X, U_exp, 'LineWidth', 2);
+    ylim([-1,1])
     ylabel("composition u_exp");
     xlabel("x");
 
@@ -122,7 +110,7 @@ while 1%i < 1000
     plot(t, E)
     ylabel("total free energy");
     xlabel("t");
-    pause(0.01)
+    pause(0.00001)
     
     %plot mass
     subplot(2,2,4)
